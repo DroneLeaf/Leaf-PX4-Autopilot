@@ -228,7 +228,7 @@ MavlinkParametersManager::handle_message(const mavlink_message_t *msg)
 
 				} else if (param_is_readonly(param)) {
 					PX4_WARN("param %s is read-only", name);
-					send_error(static_cast<uint8_t>(ParamError::ReadOnly), name, -1, msg->sysid, msg->compid);
+					send_error(MAV_PARAM_ERROR_READ_ONLY, name, -1, msg->sysid, msg->compid);
 
 				} else {
 					// According to the mavlink spec we should always acknowledge a write operation.
