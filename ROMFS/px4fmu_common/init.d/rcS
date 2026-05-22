@@ -57,6 +57,8 @@ set PARAM_DEFAULTS_VER 1
 #
 ver all
 
+sleep 10
+
 #
 # Optional early board init: rc.board_early
 # Can be used for setting env vars for rcS.

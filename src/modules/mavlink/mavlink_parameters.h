@@ -115,11 +115,19 @@ protected:
 
 	int send_param(param_t param, int component_id = -1);
 
+	enum class ParamError : uint8_t {
+		DoesNotExist = 1,
+		TypeUnsupported = 2,
+		TypeMismatch = 3,
+		ReadOnly = 5,
+		ReadFail = 6
+	};
+
 	/**
 	 * Send error message.
 	 * /// @return true if a error message was sent
 	 */
-	int send_error(MAV_PARAM_ERROR error, const char *param_id = nullptr,
+	int send_error(uint8_t error, const char *param_id = nullptr,
 		       const int param_index = -1, int target_system = -1,
 		       int target_component = -1, int component_id = -1);
 

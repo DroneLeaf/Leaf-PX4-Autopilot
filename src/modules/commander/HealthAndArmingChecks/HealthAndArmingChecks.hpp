@@ -35,10 +35,13 @@
 
 #include "Common.hpp"
 
+#include <px4_platform_common/log.h>
 #include <px4_platform_common/module_params.h>
 #include <uORB/Publication.hpp>
 #include <uORB/topics/health_report.h>
 #include <uORB/topics/failsafe_flags.h>
+#include <uORB/topics/leaf_health_events.h>
+#include <uORB/Subscription.hpp>
 
 #include "checks/accelerometerCheck.hpp"
 #include "checks/airspeedCheck.hpp"
@@ -121,6 +124,10 @@ public:
 protected:
 	void updateParams() override;
 private:
+	void checkLeafHealth(Report &reporter);
+
+	static events::Log map_ext_to_log(uint8_t ext);
+
 	failsafe_flags_s _failsafe_flags{};
 
 	Context _context;
@@ -129,6 +136,11 @@ private:
 
 	uORB::Publication<health_report_s> _health_report_pub{ORB_ID(health_report)};
 	uORB::Publication<failsafe_flags_s> _failsafe_flags_pub{ORB_ID(failsafe_flags)};
+
+	uORB::Subscription _leaf_health_sub{ORB_ID(leaf_health_events)};
+	leaf_health_events_s _leaf_last{};     // last seen message (optional)
+	hrt_abstime _leaf_last_ts{0};          // for freshness window
+	bool leafEventSet[4]={false,false,false,false};
 
 	// all checks
 	AccelerometerChecks _accelerometer_checks;

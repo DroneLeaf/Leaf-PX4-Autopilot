@@ -204,7 +204,7 @@ MavlinkParametersManager::handle_message(const mavlink_message_t *msg)
 					}
 
 					/* Error report that _HASH_CHECK parameter is read-only */
-					send_error(MAV_PARAM_ERROR_READ_ONLY, name, -1, msg->sysid, msg->compid);
+					send_error(static_cast<uint8_t>(ParamError::ReadOnly), name, -1, msg->sysid, msg->compid);
 
 					/* No other action taken, return */
 					return;
@@ -215,20 +215,20 @@ MavlinkParametersManager::handle_message(const mavlink_message_t *msg)
 
 				if (param == PARAM_INVALID) {
 					PX4_ERR("unknown param: %s", name);
-					send_error(MAV_PARAM_ERROR_DOES_NOT_EXIST, name, -1, msg->sysid, msg->compid);
+					send_error(static_cast<uint8_t>(ParamError::DoesNotExist), name, -1, msg->sysid, msg->compid);
 
 				} else if (!((set.param_type == MAV_PARAM_TYPE_INT32) || (set.param_type == MAV_PARAM_TYPE_REAL32))) {
 					PX4_ERR("param type unsupported: %s", name);
-					send_error(MAV_PARAM_ERROR_TYPE_UNSUPPORTED, name, -1, msg->sysid, msg->compid);
+					send_error(static_cast<uint8_t>(ParamError::TypeUnsupported), name, -1, msg->sysid, msg->compid);
 
 				} else if (!((param_type(param) == PARAM_TYPE_INT32 && set.param_type == MAV_PARAM_TYPE_INT32) ||
 					     (param_type(param) == PARAM_TYPE_FLOAT && set.param_type == MAV_PARAM_TYPE_REAL32))) {
 					PX4_ERR("param types mismatch param: %s", name);
-					send_error(MAV_PARAM_ERROR_TYPE_MISMATCH, name, -1, msg->sysid, msg->compid);
+					send_error(static_cast<uint8_t>(ParamError::TypeMismatch), name, -1, msg->sysid, msg->compid);
 
 				} else if (param_is_readonly(param)) {
 					PX4_WARN("param %s is read-only", name);
-					send_error(MAV_PARAM_ERROR_READ_ONLY, name, -1, msg->sysid, msg->compid);
+					send_error(static_cast<uint8_t>(ParamError::ReadOnly), name, -1, msg->sysid, msg->compid);
 
 				} else {
 					// According to the mavlink spec we should always acknowledge a write operation.
@@ -305,11 +305,11 @@ MavlinkParametersManager::handle_message(const mavlink_message_t *msg)
 
 						if (result == 1) {
 							PX4_ERR("Unknown param name: %s", name);
-							send_error(MAV_PARAM_ERROR_DOES_NOT_EXIST, name, -1, msg->sysid, msg->compid);
+							send_error(static_cast<uint8_t>(ParamError::DoesNotExist), name, -1, msg->sysid, msg->compid);
 
 						} else if (result == 2) {
 							PX4_ERR("Failed loading param from storage: %s", name);
-							send_error(MAV_PARAM_ERROR_READ_FAIL, name, -1, msg->sysid, msg->compid);
+							send_error(static_cast<uint8_t>(ParamError::ReadFail), name, -1, msg->sysid, msg->compid);
 						}
 					}
 
@@ -320,11 +320,11 @@ MavlinkParametersManager::handle_message(const mavlink_message_t *msg)
 
 					if (ret == 1) {
 						PX4_ERR("Unknown param index: %i", req_read.param_index);
-						send_error(MAV_PARAM_ERROR_DOES_NOT_EXIST, nullptr, req_read.param_index, msg->sysid, msg->compid);
+						send_error(static_cast<uint8_t>(ParamError::DoesNotExist), nullptr, req_read.param_index, msg->sysid, msg->compid);
 
 					} else if (ret == 2) {
 						PX4_ERR("Failed loading param from storage index: %i", req_read.param_index);
-						send_error(MAV_PARAM_ERROR_READ_FAIL, nullptr, req_read.param_index, msg->sysid, msg->compid);
+						send_error(static_cast<uint8_t>(ParamError::ReadFail), nullptr, req_read.param_index, msg->sysid, msg->compid);
 
 					}
 				}
@@ -676,7 +676,7 @@ MavlinkParametersManager::send_param(param_t param, int component_id)
 }
 
 
-int MavlinkParametersManager:: send_error(MAV_PARAM_ERROR error, const char *param_id, const int param_index,
+int MavlinkParametersManager:: send_error(uint8_t error, const char *param_id, const int param_index,
 		const int target_sysid, const int target_compid,
 		int component_id)
 {
