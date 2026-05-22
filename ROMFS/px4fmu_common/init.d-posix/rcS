@@ -167,7 +167,7 @@ param set-default COM_CPU_MAX -1
 param set-default COM_RAM_MAX -1
 
 # Don't require RC calibration and configuration (4 = RC disabled, no throttle check)
-param set-default COM_RC_IN_MODE 4
+param set-default COM_RC_IN_MODE 0
 
 # Speedup SITL startup
 param set-default EKF2_REQ_GPS_H 0.5

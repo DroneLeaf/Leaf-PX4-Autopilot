@@ -445,9 +445,6 @@ static const StreamListItem streams_list[] = {
 #if defined(ADSB_VEHICLE_HPP)
 	create_stream_list_item<MavlinkStreamADSBVehicle>(),
 #endif // ADSB_VEHICLE_HPP
-#if defined(COLLISION_HPP)
-	create_stream_list_item<MavlinkStreamCollision>(),
-#endif // COLLISION_HPP
 #if defined(WIND_COV_HPP)
 	create_stream_list_item<MavlinkStreamWindCov>(),
 #endif // WIND_COV_HPP
