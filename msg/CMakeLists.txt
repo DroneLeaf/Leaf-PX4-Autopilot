@@ -123,6 +123,7 @@ set(msg_files
 	LandingTargetInnovations.msg
 	LandingTargetPose.msg
 	LaunchDetectionStatus.msg
+	LeafHealthEvents.msg
 	LedControl.msg
 	LoggerStatus.msg
 	LogMessage.msg
@@ -235,6 +236,8 @@ set(msg_files
 	WheelEncoders.msg
 	Wind.msg
 	YawEstimatorStatus.msg
+	VehicleTorqueSetpointMode.msg
+	VehicleThrustSetpointMode.msg
 	versioned/ActuatorMotors.msg
 	versioned/ActuatorServos.msg
 	versioned/AirspeedValidated.msg
