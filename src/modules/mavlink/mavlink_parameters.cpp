@@ -139,10 +139,6 @@ MavlinkParametersManager::handle_message(const mavlink_message_t *msg)
 					PX4_ERR("param types mismatch param: %s", name);
 					send_error(static_cast<uint8_t>(ParamError::TypeMismatch), name, -1, msg->sysid, msg->compid);
 
-				} else if (param_is_readonly(param)) {
-					PX4_WARN("param %s is read-only", name);
-					send_error(static_cast<uint8_t>(ParamError::ReadOnly), name, -1, msg->sysid, msg->compid);
-
 				} else {
 					// According to the mavlink spec we should always acknowledge a write operation.
 					param_set(param, &(set.param_value));
@@ -572,8 +568,6 @@ MavlinkParametersManager::send_param(param_t param, int component_id)
 		_mavlink_resend_uart(_mavlink.get_channel(), &mavlink_packet);
 	}
 
-	_last_param_sent = hrt_absolute_time();
-
 	return 0;
 }
 
@@ -621,7 +615,7 @@ int MavlinkParametersManager:: send_error(uint8_t error, const char *param_id, c
 	} else {
 		// Re-pack the message with a different component ID
 		mavlink_message_t mavlink_packet;
-		mavlink_msg_param_value_encode_chan(mavlink_system.sysid, component_id, _mavlink.get_channel(), &mavlink_packet, &msg);
+		mavlink_msg_param_error_encode_chan(mavlink_system.sysid, component_id, _mavlink.get_channel(), &mavlink_packet, &msg);
 		_mavlink_resend_uart(_mavlink.get_channel(), &mavlink_packet);
 	}
 
