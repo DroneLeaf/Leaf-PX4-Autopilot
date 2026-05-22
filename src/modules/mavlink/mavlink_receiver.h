@@ -56,6 +56,7 @@
 #include <lib/drivers/gyroscope/PX4Gyroscope.hpp>
 #include <lib/drivers/magnetometer/PX4Magnetometer.hpp>
 #include <lib/systemlib/mavlink_log.h>
+#include <px4_platform_common/events.h>
 #include <px4_platform_common/module_params.h>
 #include <uORB/Publication.hpp>
 #include <uORB/PublicationMulti.hpp>
@@ -64,6 +65,10 @@
 #include <uORB/topics/actuator_outputs.h>
 #include <uORB/topics/airspeed.h>
 #include <uORB/topics/autotune_attitude_control_status.h>
+#if defined(MAVLINK_MSG_ID_ESC_EEPROM)
+#include <uORB/topics/esc_eeprom_write.h>
+#endif
+#include <uORB/topics/esc_status.h>
 #include <uORB/topics/battery_status.h>
 #include <uORB/topics/camera_status.h>
 #include <uORB/topics/cellular_status.h>
@@ -80,6 +85,7 @@
 #include <uORB/topics/input_rc.h>
 #include <uORB/topics/irlock_report.h>
 #include <uORB/topics/landing_target_pose.h>
+#include <uORB/topics/leaf_health_events.h>
 #include <uORB/topics/log_message.h>
 #include <uORB/topics/manual_control_setpoint.h>
 #include <uORB/topics/mavlink_tunnel.h>
@@ -110,7 +116,13 @@
 #include <uORB/topics/vehicle_odometry.h>
 #include <uORB/topics/vehicle_rates_setpoint.h>
 #include <uORB/topics/vehicle_status.h>
+#include <uORB/topics/vehicle_torque_setpoint_mode.h>
+#include <uORB/topics/vehicle_thrust_setpoint_mode.h>
+#include <uORB/topics/actuator_motors.h>
+#include <uORB/topics/event.h>
 #include <uORB/topics/velocity_limits.h>
+#include <uORB/topics/aux_global_position.h>
+#include <uORB/topics/ranging_beacon.h>
 
 #if !defined(CONSTRAINED_FLASH)
 # include <uORB/topics/debug_array.h>
@@ -203,11 +215,22 @@ private:
 #if defined(MAVLINK_MSG_ID_SET_VELOCITY_LIMITS) // For now only defined if development.xml is used
 	void handle_message_set_velocity_limits(mavlink_message_t *msg);
 #endif
+#if defined(MAVLINK_MSG_ID_ESC_EEPROM) // For now only defined if development.xml is used
+	void handle_message_esc_eeprom(mavlink_message_t *msg);
+#endif
 	void handle_message_vision_position_estimate(mavlink_message_t *msg);
 	void handle_message_gimbal_manager_set_attitude(mavlink_message_t *msg);
 	void handle_message_gimbal_manager_set_manual_control(mavlink_message_t *msg);
 	void handle_message_gimbal_device_information(mavlink_message_t *msg);
 	void handle_message_gimbal_device_attitude_status(mavlink_message_t *msg);
+	void handle_message_vehicle_torque_setpoint_mode(mavlink_message_t *msg);
+	void handle_message_vehicle_thrust_setpoint_mode(mavlink_message_t *msg);
+	void handle_message_actuator_motors(mavlink_message_t *msg);
+	void handle_message_event(mavlink_message_t *msg);
+	void handle_message_global_position_sensor(mavlink_message_t *msg);
+#if defined(MAVLINK_MSG_ID_RANGING_BEACON)
+	void handle_message_ranging_beacon(mavlink_message_t *msg);
+#endif // MAVLINK_MSG_ID_RANGING_BEACON
 
 #if !defined(CONSTRAINED_FLASH)
 	void handle_message_debug(mavlink_message_t *msg);
@@ -235,6 +258,8 @@ private:
 
 	void fill_thrust(float *thrust_body_array, uint8_t vehicle_type, float thrust);
 
+	static offboard_control_mode_s fill_offboard_control_mode(const trajectory_setpoint_s &setpoint);
+
 	void schedule_tune(const char *tune);
 
 	void update_message_statistics(const mavlink_message_t &message);
@@ -261,6 +286,9 @@ private:
 	mavlink_status_t		_status{}; ///< receiver status, used for mavlink_parse_char()
 
 	orb_advert_t _mavlink_log_pub{nullptr};
+	orb_advert_t _vehicle_torque_setpoint_mode_pub{nullptr};
+	orb_advert_t _vehicle_thrust_setpoint_mode_pub{nullptr};
+	orb_advert_t _actuator_motors_pub{nullptr};
 
 	static constexpr unsigned MAX_REMOTE_COMPONENTS{16};
 	struct ComponentState {
@@ -310,6 +338,7 @@ private:
 	uORB::Publication<log_message_s>			_log_message_pub{ORB_ID(log_message)};
 	uORB::Publication<mavlink_tunnel_s>			_mavlink_tunnel_pub{ORB_ID(mavlink_tunnel)};
 	uORB::Publication<mavlink_tunnel_s>			_esc_serial_passthru_pub{ORB_ID(esc_serial_passthru)};
+	uORB::Publication<mavlink_tunnel_s>			_io_serial_passthru_pub{ORB_ID(io_serial_passthru)};
 	uORB::Publication<obstacle_distance_s>			_obstacle_distance_pub{ORB_ID(obstacle_distance)};
 	uORB::Publication<offboard_control_mode_s>		_offboard_control_mode_pub{ORB_ID(offboard_control_mode)};
 	uORB::Publication<onboard_computer_status_s>		_onboard_computer_status_pub{ORB_ID(onboard_computer_status)};
@@ -325,9 +354,15 @@ private:
 	uORB::Publication<vehicle_global_position_s>		_global_pos_pub{ORB_ID(vehicle_global_position)};
 	uORB::Publication<vehicle_local_position_s>		_local_pos_pub{ORB_ID(vehicle_local_position)};
 	uORB::Publication<trajectory_setpoint_s>		_trajectory_setpoint_pub{ORB_ID(trajectory_setpoint)};
+	uORB::Publication<leaf_health_events_s> 		_leaf_health_pub{ORB_ID(leaf_health_events)};
 	uORB::Publication<vehicle_odometry_s>			_mocap_odometry_pub{ORB_ID(vehicle_mocap_odometry)};
 	uORB::Publication<vehicle_odometry_s>			_visual_odometry_pub{ORB_ID(vehicle_visual_odometry)};
 	uORB::Publication<vehicle_rates_setpoint_s>		_rates_sp_pub{ORB_ID(vehicle_rates_setpoint)};
+	uORB::Publication<ranging_beacon_s>			_ranging_beacon_pub{ORB_ID(ranging_beacon)};
+
+#if defined(MAVLINK_MSG_ID_ESC_EEPROM)
+	uORB::Publication<esc_eeprom_write_s>			_esc_eeprom_write_pub {ORB_ID(esc_eeprom_write)};
+#endif
 
 #if !defined(CONSTRAINED_FLASH)
 	uORB::Publication<debug_array_s>			_debug_array_pub {ORB_ID(debug_array)};
@@ -338,6 +373,7 @@ private:
 
 	// ORB publications (multi)
 	uORB::PublicationMulti<distance_sensor_s>		_distance_sensor_pub{ORB_ID(distance_sensor)};
+	uORB::PublicationMulti<aux_global_position_s>		_aux_global_position_pub{ORB_ID(aux_global_position)};
 	uORB::PublicationMulti<gps_inject_data_s>		_gps_inject_data_pub{ORB_ID(gps_inject_data)};
 	uORB::PublicationMulti<input_rc_s>			_rc_pub{ORB_ID(input_rc)};
 	uORB::PublicationMulti<manual_control_setpoint_s>	_manual_control_input_pub{ORB_ID(manual_control_input)};
@@ -390,6 +426,7 @@ private:
 	hrt_abstime _heartbeat_type_onboard_controller{0};
 	hrt_abstime _heartbeat_type_gimbal{0};
 	hrt_abstime _heartbeat_type_adsb{0};
+	hrt_abstime _heartbeat_type_flarm{0};
 	hrt_abstime _heartbeat_type_camera{0};
 	hrt_abstime _heartbeat_type_parachute{0};
 	hrt_abstime _heartbeat_type_open_drone_id{0};
