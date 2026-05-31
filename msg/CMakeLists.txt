@@ -70,6 +70,8 @@ set(msg_files
 	Ekf2Timestamps.msg
 	EscReport.msg
 	EscStatus.msg
+	EscEepromRead.msg
+	EscEepromWrite.msg
 	EstimatorAidSource1d.msg
 	EstimatorAidSource2d.msg
 	EstimatorAidSource3d.msg
@@ -174,6 +176,7 @@ set(msg_files
 	QshellReq.msg
 	QshellRetval.msg
 	RadioStatus.msg
+	RangingBeacon.msg
 	RateCtrlStatus.msg
 	RcChannels.msg
 	RcParameterMap.msg
