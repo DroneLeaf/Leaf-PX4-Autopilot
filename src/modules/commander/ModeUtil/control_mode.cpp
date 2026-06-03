@@ -157,6 +157,10 @@ void getVehicleControlMode(uint8_t nav_state, uint8_t vehicle_type,
 			vehicle_control_mode.flag_control_rates_enabled = true;
 			vehicle_control_mode.flag_control_allocation_enabled = true;
 
+		} else if (offboard_control_mode.direct_actuator) {
+			vehicle_control_mode.flag_control_manual_enabled = true;
+			vehicle_control_mode.flag_control_allocation_enabled = true;
+
 		} else if (offboard_control_mode.thrust_and_torque) {
 			vehicle_control_mode.flag_control_allocation_enabled = true;
 		}
