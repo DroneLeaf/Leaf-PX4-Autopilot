@@ -19,3 +19,7 @@ param set-default MAV_2_REMOTE_PRT 14550
 param set-default MAV_2_UDP_PRT 14550
 
 safety_button start
+
+
+param set-default MODAL_IO_BAUD 250000
+param set-default MODAL_IO_CONFIG 1

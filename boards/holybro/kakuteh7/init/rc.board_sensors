@@ -15,3 +15,8 @@ if ! bmp280 -X start
 then
 	spa06 -X start
 fi
+
+if param greater MODAL_IO_CONFIG 0
+then
+	modal_io start
+fi
