@@ -70,6 +70,8 @@ set(msg_files
 	Ekf2Timestamps.msg
 	EscReport.msg
 	EscStatus.msg
+	EscEepromRead.msg
+	EscEepromWrite.msg
 	EstimatorAidSource1d.msg
 	EstimatorAidSource2d.msg
 	EstimatorAidSource3d.msg
@@ -126,6 +128,7 @@ set(msg_files
 	LandingTargetInnovations.msg
 	LandingTargetPose.msg
 	LaunchDetectionStatus.msg
+	LeafHealthEvents.msg
 	LedControl.msg
 	LoggerStatus.msg
 	LogMessage.msg
@@ -239,6 +242,8 @@ set(msg_files
 	VelocityLimits.msg
 	WheelEncoders.msg
 	YawEstimatorStatus.msg
+	VehicleTorqueSetpointMode.msg
+	VehicleThrustSetpointMode.msg
 	versioned/ActuatorMotors.msg
 	versioned/ActuatorServos.msg
 	versioned/AirspeedValidated.msg
