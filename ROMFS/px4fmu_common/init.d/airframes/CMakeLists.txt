@@ -31,6 +31,8 @@
 #
 ############################################################################
 
+add_subdirectory(common_leaf)
+
 px4_add_romfs_files(
 	# [0-999] Reserved (historical)
 
@@ -77,7 +79,15 @@ if(CONFIG_MODULES_MC_RATE_CONTROL)
 		4500_clover4
 		4601_droneblocks_dexi_5
 		4901_crazyflie21
-
+	4951_hear_quad_ethernet_indoor
+	4952_hear_quad_telem_indoor
+	4953_hear_octa_ethernet_indoor
+	4954_hear_octa_telem_indoor
+	4955_hear_quad_ethernet_gps
+	4956_hear_quad_ethernet_rtk
+	4961_hear_ethernet_rtk_emlid
+	4970_hear_rc_raw_forwarder
+	4999_snono_vtol
 		# [5000, 5999] Quadrotor +
 		5001_quad_+
 
@@ -106,9 +116,13 @@ if(CONFIG_MODULES_MC_RATE_CONTROL)
 		16001_helicopter
 
 		24001_dodeca_cox
+
+		# [49000, 49999] Redundant drones
+		49511_hear_quad_ethernet_indoor_red_1
+		49512_hear_quad_ethernet_indoor_red_2
+		49513_hear_quad_ethernet_indoor_red_3
 	)
 endif()
-
 if(CONFIG_MODULES_FW_RATE_CONTROL)
 	px4_add_romfs_files(
 		# [2000, 2999] Standard planes
@@ -167,9 +181,9 @@ endif()
 if(CONFIG_MODULES_UUV_ATT_CONTROL)
 	px4_add_romfs_files(
 		# [60000, 61000] (Unmanned) Underwater Robots
-		60000_uuv_generic
-		60001_uuv_hippocampus
-		60002_uuv_bluerov2_heavy
+		# 60000_uuv_generic
+		# 60001_uuv_hippocampus
+		# 60002_uuv_bluerov2_heavy
 	)
 endif()
 
