@@ -56,6 +56,7 @@
 #include <lib/drivers/gyroscope/PX4Gyroscope.hpp>
 #include <lib/drivers/magnetometer/PX4Magnetometer.hpp>
 #include <lib/systemlib/mavlink_log.h>
+#include <px4_platform_common/events.h>
 #include <px4_platform_common/module_params.h>
 #include <uORB/Publication.hpp>
 #include <uORB/PublicationMulti.hpp>
@@ -80,6 +81,7 @@
 #include <uORB/topics/input_rc.h>
 #include <uORB/topics/irlock_report.h>
 #include <uORB/topics/landing_target_pose.h>
+#include <uORB/topics/leaf_health_events.h>
 #include <uORB/topics/log_message.h>
 #include <uORB/topics/manual_control_setpoint.h>
 #include <uORB/topics/mavlink_tunnel.h>
@@ -110,6 +112,10 @@
 #include <uORB/topics/vehicle_odometry.h>
 #include <uORB/topics/vehicle_rates_setpoint.h>
 #include <uORB/topics/vehicle_status.h>
+#include <uORB/topics/vehicle_torque_setpoint_mode.h>
+#include <uORB/topics/vehicle_thrust_setpoint_mode.h>
+#include <uORB/topics/actuator_motors.h>
+#include <uORB/topics/event.h>
 #include <uORB/topics/velocity_limits.h>
 
 #if !defined(CONSTRAINED_FLASH)
@@ -208,6 +214,10 @@ private:
 	void handle_message_gimbal_manager_set_manual_control(mavlink_message_t *msg);
 	void handle_message_gimbal_device_information(mavlink_message_t *msg);
 	void handle_message_gimbal_device_attitude_status(mavlink_message_t *msg);
+	void handle_message_vehicle_torque_setpoint_mode(mavlink_message_t *msg);
+	void handle_message_vehicle_thrust_setpoint_mode(mavlink_message_t *msg);
+	void handle_message_actuator_motors(mavlink_message_t *msg);
+	void handle_message_event(mavlink_message_t *msg);
 
 #if !defined(CONSTRAINED_FLASH)
 	void handle_message_debug(mavlink_message_t *msg);
@@ -261,6 +271,9 @@ private:
 	mavlink_status_t		_status{}; ///< receiver status, used for mavlink_parse_char()
 
 	orb_advert_t _mavlink_log_pub{nullptr};
+	orb_advert_t _vehicle_torque_setpoint_mode_pub{nullptr};
+	orb_advert_t _vehicle_thrust_setpoint_mode_pub{nullptr};
+	orb_advert_t _actuator_motors_pub{nullptr};
 
 	static constexpr unsigned MAX_REMOTE_COMPONENTS{16};
 	struct ComponentState {
@@ -328,6 +341,7 @@ private:
 	uORB::Publication<vehicle_odometry_s>			_mocap_odometry_pub{ORB_ID(vehicle_mocap_odometry)};
 	uORB::Publication<vehicle_odometry_s>			_visual_odometry_pub{ORB_ID(vehicle_visual_odometry)};
 	uORB::Publication<vehicle_rates_setpoint_s>		_rates_sp_pub{ORB_ID(vehicle_rates_setpoint)};
+	uORB::Publication<leaf_health_events_s>                 _leaf_health_pub{ORB_ID(leaf_health_events)};
 
 #if !defined(CONSTRAINED_FLASH)
 	uORB::Publication<debug_array_s>			_debug_array_pub {ORB_ID(debug_array)};
