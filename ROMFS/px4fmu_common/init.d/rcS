@@ -47,6 +47,8 @@ set PARAM_DEFAULTS_VER 1
 #
 ver all
 
+sleep 10
+
 #
 # Try to mount the microSD card.
 #
